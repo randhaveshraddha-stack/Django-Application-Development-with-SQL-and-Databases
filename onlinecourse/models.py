@@ -1,9 +1,3 @@
-from django.db import models
-from django.conf import settings
-from django.utils.timezone import now
-
-# Existing Course, Lesson, Instructor, and Learner models would be here...
-
 class Question(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     question_text = models.CharField(max_length=250)
@@ -11,6 +5,14 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question_text
+
+    def is_get_score(self, selected_ids):
+        all_answers = self.choice_set.filter(is_correct=True).count()
+        selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
+        if all_answers == selected_correct:
+            return True
+        else:
+            return False
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -23,3 +25,6 @@ class Choice(models.Model):
 class Submission(models.Model):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Choice)
+
+    def __str__(self):
+        return f"Submission {self.id} for Enrollment {self.enrollment.id}"
